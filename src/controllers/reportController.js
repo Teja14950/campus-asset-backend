@@ -49,3 +49,28 @@ exports.assignReport = async (req,res) => {
   }
 };
 
+exports.getMostDamagedAssets = async (req,res) => {
+  try {
+    const result = await pool.query(
+      'SELECT assets.name, COUNT(reports.id) AS report_count FROM reports JOIN assets ON reports.asset_id = assets.id GROUP BY assets.name ORDER BY report_count DESC'
+    );
+    res.json(result.rows);
+  } catch {
+    res.status(500).json({error: "Failed to fetch analytics"});
+  }
+};
+
+exports.updateReportStatus = async (req,res) => {
+  try {
+    const {id} = req.params;
+    const {status} = req.body;
+
+    const result = await pool.query(
+      "UPDATE reports SET status = $1 WHERE id = $2 RETURNING *",
+      [status,id]
+    )
+  } catch {
+    res.status(500).json({error: "Failed to update status"});
+  }
+};
+
