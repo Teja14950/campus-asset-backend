@@ -65,12 +65,31 @@ exports.updateReportStatus = async (req,res) => {
     const {id} = req.params;
     const {status} = req.body;
 
-    const result = await pool.query(
-      "UPDATE reports SET status = $1 WHERE id = $2 RETURNING *",
-      [status,id]
-    )
+    let query;
+
+    if(status === 'resolved') {
+      query = 'UPDATE reports SET status = $1, resolved_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *';
+    }
+    else {
+      query = 'UPDATE reports SET status = $1 WHERE id = $2 RETURNING *';
+    }
+
+    const result = await pool.query(query,[status,id]);
+    res.json(result.rows[0]);
   } catch {
     res.status(500).json({error: "Failed to update status"});
   }
 };
+
+exports.getAverageRepairTime = async (req,res) => {
+  try {
+    const result = await pool.query(
+      "SELECT AVG(resolved_at - created_at) AS avg_repair_time FROM reports WHERE status = 'resolved' "
+    );
+    res.json(result.rows[0]);
+  } catch {
+    res.status(500).json({error: 'Failed to fetch repair time'});
+  }
+};
+
 

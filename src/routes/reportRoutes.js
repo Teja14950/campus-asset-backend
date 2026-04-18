@@ -7,4 +7,5 @@ router.get("/", reportController.getReports);
 router.put("/:id/assign",reportController.assignReport);
 router.get("/analytics/damaged-assets",reportController.getMostDamagedAssets);
 router.put("/:id/status",reportController.updateReportStatus);
+router.get("/analytics/repair-time", reportController.getAverageRepairTime);
 module.exports = router;
